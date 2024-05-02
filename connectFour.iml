@@ -1,0 +1,324 @@
+/*
+Name: Theodore Sullenberger
+Project: Connect 4 programed in JAVA, a informal prerequisite of CS 314
+Date Started: 2/18/2024
+Last Edit: 2/24/2024
+Total Lines:
+Number of comment Lines:
+Number of blank spacer lines:
+Number of Lines with only brackets:
+Number of aggrigate code lines:
+
+Author Notes, 2/18/2024:Returning tO Java
+last time I coded in java was Highschool
+once I started at UNT i learned C++
+time learn it all again
+
+seeing how to declare functions after tests wouldn't have named the class main
+
+FUNCTIONS completed
+display()
+chipPlace()
+
+2/24/2024:
+Been focusing on classes, have some time now hope to Finish
+when testing had probems with overflows time to fix
+
+4/8/2024:
+Been a min. Come back and code is good got diagonals to stop insta-crashing. Diagonals Work Project Near Complete
+Only one bug diagonals have werid quirk where
+----
+xx--
+oox-
+xoox    counts as a win
+
+5/1/2024: 
+Final day to turn in application did some work added comments and such final touch ups
+relized my prjects uses a 2d array instead of arrays or a list but a 2D array is an array of arrays so....
+also it is over 300 lines but code doesnt start till line 46 so its more like 270.
+I also broke down win stuff into more methods in order to hit 8 functions also makes it prettier.
+Thats all for this project.
+Functions completed
+colFilled()
+winStuff()
+display()
+main()
+winCondition() finally finished
+*/
+import java.util.Scanner;
+
+public class main
+{
+    //Declaration Zone
+    //constant ints for the x & y (rows and columns) for the 2D array.
+    final static int ROWS=6;        //==y (on grid x&y)
+    final static int COLUMNS=7;     //==x
+
+    //constant chars for each players token
+    final static char PONETOK='X';//==P1
+    final static char PTWOTOK='O';//==P2
+
+    final static int WINAMOUNT=4;//constant made for th amount of pieces needed to win
+
+    static int turnNum=1;//Number of turns
+
+    static char [][] c4Board=new char[ROWS][COLUMNS];//The 2D that stores characters, the playing field,
+
+    static boolean gameOn=true;//A Boolean that continually runs the game until a winner is found
+
+    static boolean colSearch=true;//A Boolean that allows user to input wrong answers without crash
+
+    static boolean player1Turn=true;//A boolean determining whos turn it is
+    ////////////////////////////////////////////////////////////////////FUNCTION BREAK///////////////////////////////
+    //THE MAIN FUNCTION
+    public static void main(String[] args)
+    {
+        //turning scanner on
+        Scanner myObj=new Scanner(System.in);
+        //string scanner will gather
+        String userString;
+        //char gathered from string
+        char userChar;
+        //int gathered from char
+        int choice=0;
+
+        for(int y=0;y<ROWS;y++) //makes an empty board
+        {
+            for (int x = 0; x < COLUMNS; x++)
+            {
+                c4Board[y][x]=' ';
+            }
+        }
+        while(gameOn)   //lets the game play on till a winner is found
+        {
+            display();
+
+            while (colSearch)   //allows player to make mistakes while chosing a column and not lose their turn
+            {
+                userString = myObj.nextLine();
+                userChar = userString.charAt(0);    // This will be used to find given column
+                choice = Character.getNumericValue(userChar);
+                System.out.println();
+                if(1>choice||choice>7)  //this checks if their choice of column exists
+                {
+                    System.out.println("Try Again");
+                }
+                else if(colFilled(choice))  // this checks if the column has an acceptable spot open
+                {
+                    System.out.println("Try Again");
+                }
+                else    //if the choice passes these things it allows a piece to place in that column
+                {
+                    colSearch=false;
+                }
+            }
+            chipPlace(choice);
+            winCondition(choice);
+            if(!gameOn) //if a winner has been found do winStuff
+            {
+                winStuff();
+            }
+            player1Turn=!player1Turn;
+            colSearch=true;
+        }
+    }
+    ////////////////////////////////////////////////////////////////////FUNCTION BREAK///////////////////////////////
+    //A Function that displays the board
+    public static void display()
+    {
+        System.out.println("CONNECT-"+WINAMOUNT+"!!!");//Sets Top board
+        System.out.println("Player One - "+PONETOK+"\tPlayer Two - "+PTWOTOK);
+        System.out.println("-----------------------------");
+        for(int y=0;y<ROWS;y++)
+        {
+            for (int x=0;x<COLUMNS;x++)
+            {
+                System.out.print("| "+c4Board[y][x]+" ");//creates connect 4 board
+            }
+            System.out.print("|\n");
+            System.out.println("-----------------------------");
+        }
+        System.out.println("| 1 | 2 | 3 | 4 | 5 | 6 | 7 |");
+        if(gameOn)
+        {
+            if(player1Turn)
+            {
+                System.out.println("Player One choose your column:");
+            }
+            else
+            {
+                System.out.println("Player Two choose your column:");
+            }
+        }
+    }
+    ////////////////////////////////////////////////////////////////////FUNCTION BREAK///////////////////////////////
+    //A function that places a chip on the board in user selected column
+    // Parameter - colChoice: the users choice of column
+    public static void chipPlace(int colChoice)
+    {
+        --colChoice;//accounts for index of matrix
+        for(int i=ROWS-1;i>=0;i--)//starts at bottom and goes up looking for blank spaces
+        {
+            if(c4Board[i][colChoice]==' ')
+            {
+                if(player1Turn)
+                {
+                    c4Board[i][colChoice] = PONETOK;
+                }
+                else
+                {
+                    c4Board[i][colChoice] = PTWOTOK;
+                }
+                break;
+            }
+        }
+    }
+    ////////////////////////////////////////////////////////////////////FUNCTION BREAK///////////////////////////////
+    //A boolean that allows the code to see if a column has been filled with pieces
+    // Parameter - colChoice: the users choice of column
+    public static boolean colFilled(int colChoice)
+    {
+        --colChoice;
+        if(c4Board[0][colChoice]==' ')
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+////////////////////////////////////////////////////////////////////FUNCTION BREAK///////////////////////////////
+    //A function that checks if anyone has won
+    // Parameter - colChoice: the users choice of column
+    public static void winCondition(int colChoice)
+    {
+        colChoice--;// acounts for the matrix index
+        int winCount = 0; //setup for winCondition
+        char searchChar;
+        if (player1Turn) //this sets the winning letter (player who placed winning chip)
+        {
+            searchChar = PONETOK;
+        }
+        else
+        {
+            searchChar = PTWOTOK;
+        }
+        vertWin(winCount,searchChar);
+        horzWin(winCount,searchChar);
+        diagWin(winCount,searchChar);
+
+    }
+
+    ////////////////////////////////////////////////////////////////////FUNCTION BREAK///////////////////////////////
+    //function dedicated to handling the display and other things when a player has won
+    public static void winStuff()
+    {
+        display();
+        if(player1Turn)
+        {
+            System.out.println("PLAYER ONE WINS!!!");
+        }
+        else
+        {
+            System.out.println("PLAYER TWO WINS!!!");
+        }
+    }
+    ////////////////////////////////////////////////////////////////////FUNCTION BREAK///////////////////////////////
+    //function dedicated to handling if a player won vertically
+    public static void vertWin(int winCount,char searchChar)
+    {
+        for (int x = 0; x < COLUMNS; x++)  //this nested for loop checks for vertical wins
+        {
+            for (int y = 0; y < ROWS; y++)
+            {
+                if (c4Board[y][x] == searchChar)
+                {
+                    winCount++;
+                }
+                else
+                {
+                    winCount = 0;
+                }
+                if (winCount == WINAMOUNT)
+                {
+                    gameOn = false;
+                    break;
+                }
+            }
+        }
+    }
+    ////////////////////////////////////////////////////////////////////FUNCTION BREAK///////////////////////////////
+    //function dedicated to handling if a player won horizontally
+    public static void horzWin(int winCount,char searchChar)
+    {
+        for (int y = 0; y < ROWS; y++) //this nested for loop checks for horizontal wins
+        {
+            for (int x = 0; x < COLUMNS; x++)
+            {
+                if (c4Board[y][x] == searchChar)
+                {
+                    winCount++;
+                }
+                else
+                {
+                    winCount = 0;
+                }
+                if (winCount == WINAMOUNT)
+                {
+                    gameOn = false;
+                    break;
+                }
+            }
+        }
+    }
+    ////////////////////////////////////////////////////////////////////FUNCTION BREAK///////////////////////////////
+    //function dedicated to handling if a player won diagonally
+    public static void diagWin(int winCount,char searchChar)
+    {
+        for (int x = 0; x < COLUMNS; x++)//Handles diagonals if they go diagonal as if y=-x
+        {
+            for (int y = 0; y < ROWS; y++)
+            {
+                for (int t = 0; t < WINAMOUNT; t++)
+                {
+                    if ((y + t) <= (ROWS - 1) && (x + t) <= (COLUMNS - 1) && c4Board[y + t][x + t] == searchChar)
+                    {
+                        winCount++;
+                    }
+                    else
+                    {
+                        winCount = 0;
+                    }
+                    if (winCount == WINAMOUNT)
+                    {
+                        gameOn = false;
+                        break;
+                    }
+                }
+            }
+        }
+        for (int x = 0; x < COLUMNS; x++)//Handles diagonals if they go diagonal as if y=x
+        {
+            for (int y = 0; y < ROWS; y++)
+            {
+                for (int t = 0; t < WINAMOUNT; t++)
+                {
+                    if ((y + t) <= (ROWS - 1) && (x - t) >= 0 && c4Board[y + t][x - t] == searchChar)
+                    {
+                        winCount++;
+                    }
+                    else
+                    {
+                        winCount = 0;
+                    }
+                    if (winCount == WINAMOUNT)
+                    {
+                        gameOn = false;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
